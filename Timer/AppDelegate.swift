@@ -11,7 +11,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
   private var staysOnTop = false {
     didSet {
       for window in NSApplication.shared.windows {
-        window.level = self.windowLevel
+        if let window = window as? MVWindow {
+          window.applyStaysOnTop(self.staysOnTop)
+        } else {
+          window.level = self.windowLevel
+        }
       }
     }
   }
@@ -175,7 +179,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
   @objc func newDocument(_: AnyObject?) {
     let controller = MVTimerController(closeToWindow: NSApplication.shared.keyWindow)
-    controller.window?.level = self.windowLevel
     self.controllers.append(controller)
   }
 
@@ -239,7 +242,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
   private func registerDefaults() {
     UserDefaults.standard.register(defaults: [
-      MVUserDefaultsKeys.staysOnTop: false,
+      MVUserDefaultsKeys.staysOnTop: true,
       MVUserDefaultsKeys.soundIndex: 0
     ])
   }
