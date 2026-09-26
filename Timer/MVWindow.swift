@@ -1,8 +1,12 @@
 import AppKit
 
-final class MVWindow: NSWindow {
+final class MVWindow: NSPanel {
   convenience init(mainView: NSView) {
-    let styleMask: NSWindow.StyleMask = [.closable, .titled]
+    let staysOnTop = UserDefaults.standard.bool(forKey: MVUserDefaultsKeys.staysOnTop)
+    var styleMask: NSWindow.StyleMask = [.closable, .titled]
+    if staysOnTop {
+      styleMask.insert(.nonactivatingPanel)
+    }
     let size: CGFloat = 150.0
     let titleBarHeight = Self.frameRect(
       forContentRect: NSRect(x: 0, y: 0, width: size, height: size),
@@ -23,6 +27,10 @@ final class MVWindow: NSWindow {
       backing: .buffered,
       defer: true
     )
+
+    // Panels hide when the app deactivates by default, timers should stay visible
+    self.hidesOnDeactivate = false
+    self.applyStaysOnTop(staysOnTop)
 
     mainView.frame = NSRect(x: 0, y: 0, width: size, height: size)
 
@@ -46,6 +54,22 @@ final class MVWindow: NSWindow {
 
       // Add the main clock view as a sibling underneath the close button
       closeButton.superview?.addSubview(mainView, positioned: .below, relativeTo: closeButton)
+    }
+  }
+
+  func applyStaysOnTop(_ staysOnTop: Bool) {
+    self.level = staysOnTop ? .floating : .normal
+
+    // Joining all Spaces as a full screen auxiliary window lets the timer float
+    // above other apps' full screen windows. macOS only shows non-activating
+    // panels there, so the style is toggled along with the behavior.
+    self.collectionBehavior = staysOnTop ? [.canJoinAllSpaces, .fullScreenAuxiliary] : []
+    if self.styleMask.contains(.nonactivatingPanel) != staysOnTop {
+      if staysOnTop {
+        self.styleMask.insert(.nonactivatingPanel)
+      } else {
+        self.styleMask.remove(.nonactivatingPanel)
+      }
     }
   }
 }
