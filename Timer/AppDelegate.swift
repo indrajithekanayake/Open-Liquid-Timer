@@ -12,6 +12,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     didSet {
       for window in NSApplication.shared.windows {
         window.level = self.windowLevel
+        if window is MVWindow {
+          window.collectionBehavior = self.windowCollectionBehavior
+        }
       }
     }
   }
@@ -176,6 +179,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
   @objc func newDocument(_: AnyObject?) {
     let controller = MVTimerController(closeToWindow: NSApplication.shared.keyWindow)
     controller.window?.level = self.windowLevel
+    controller.window?.collectionBehavior = self.windowCollectionBehavior
     self.controllers.append(controller)
   }
 
@@ -237,9 +241,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     self.staysOnTop ? .floating : .normal
   }
 
+  // Joining all Spaces as a full screen auxiliary window lets the timer
+  // float above other apps' full screen windows, not just the current Space
+  private var windowCollectionBehavior: NSWindow.CollectionBehavior {
+    self.staysOnTop ? [.canJoinAllSpaces, .fullScreenAuxiliary] : []
+  }
+
   private func registerDefaults() {
     UserDefaults.standard.register(defaults: [
-      MVUserDefaultsKeys.staysOnTop: false,
+      MVUserDefaultsKeys.staysOnTop: true,
       MVUserDefaultsKeys.soundIndex: 0
     ])
   }

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Stay on Top is now enabled by default (#1)
+
+### Fixed
+
+- Stay on Top windows now float above full screen apps and follow across Spaces (#1)
+
 ## [2.1.0] - 2026-02-07
 
 ### Added
